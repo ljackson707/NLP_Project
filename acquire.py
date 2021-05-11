@@ -12,9 +12,98 @@ import json
 from typing import Dict, List, Optional, Union, cast
 import requests
 from requests import get
+import bs4
+from bs4 import BeautifulSoup
+import pandas as pd
 
 from env import github_token, github_username
 
+#------------------------------------------------------------------------------------------------------------------------------------------------------
+urls = ['https://github.com/search?p=1&q=spaceX&type=Repositories',
+'https://github.com/search?p=2&q=spaceX&type=Repositories',
+'https://github.com/search?p=3&q=spaceX&type=Repositories',
+'https://github.com/search?p=4&q=spaceX&type=Repositories',
+'https://github.com/search?p=5&q=spaceX&type=Repositories',
+'https://github.com/search?p=6&q=spaceX&type=Repositories',
+'https://github.com/search?p=7&q=spaceX&type=Repositories',
+'https://github.com/search?p=8&q=spaceX&type=Repositories',
+'https://github.com/search?p=9&q=spaceX&type=Repositories']
+
+urls2 = ['https://github.com/search?p=10&q=spaceX&type=Repositories',
+'https://github.com/search?p=11&q=spaceX&type=Repositories',
+'https://github.com/search?p=12&q=spaceX&type=Repositories',
+'https://github.com/search?p=13&q=spaceX&type=Repositories',
+'https://github.com/search?p=14&q=spaceX&type=Repositories',
+'https://github.com/search?p=15&q=spaceX&type=Repositories',
+'https://github.com/search?p=16&q=spaceX&type=Repositories',
+'https://github.com/search?p=17&q=spaceX&type=Repositories',
+'https://github.com/search?p=18&q=spaceX&type=Repositories']
+
+url_type = [urls, urls2]
+
+def loop_url(url_type):
+    url_list= []
+    url_list2= []
+    
+    if url_type == urls:
+            
+        for url in urls:
+        
+            page = requests.get(url)
+        
+            # Create a BeautifulSoup object
+            soup = BeautifulSoup(page.text, 'html.parser')
+
+            # get the repo list
+            repo = soup.find(class_="repo-list")
+
+            # find all instances of that class
+            repo_list = repo.find_all(class_='repo-list-item')
+            
+            for repo in repo_list:
+                # find the first <a> tag and get the text. Split the text using '/' to get an array with developer name and repo name
+                full_repo_name = repo.find('a').text.split('/')
+                # extract the developer name at index 0
+                developer = full_repo_name[0].strip()
+                # extract the repo name at index 1
+                repo_name = full_repo_name[1].strip()
+                # strip() all to remove leading and traling white spaces
+
+                print("'" + developer + "/" + repo_name + "'" + ",")
+                
+                url_list.extend(repo_list)
+        
+    else:
+            
+        for url in urls2:
+                
+            page = requests.get(url)
+        
+            # Create a BeautifulSoup object
+            soup = BeautifulSoup(page.text, 'html.parser')
+
+            # get the repo list
+            repo = soup.find(class_="repo-list")
+
+            # find all instances of that class
+            repo_list = repo.find_all(class_='repo-list-item')
+            
+            for repo in repo_list:
+                # find the first <a> tag and get the text. Split the text using '/' to get an array with developer name and repo name
+                full_repo_name = repo.find('a').text.split('/')
+                # extract the developer name at index 0
+                developer = full_repo_name[0].strip()
+                # extract the repo name at index 1
+                repo_name = full_repo_name[1].strip()
+                # strip() all to remove leading and traling white spaces
+
+                print("'" + developer + "/" + repo_name + "'" + ",")
+                
+                url_list2.extend(repo_list)
+
+    return url_list, url_list2
+
+#------------------------------------------------------------------------------------------------------------------------------------------------------
 # TODO: Make a github personal access token.
 #     1. Go here and generate a personal access token https://github.com/settings/tokens
 #        You do _not_ need select any scopes, i.e. leave all the checkboxes unchecked
@@ -289,3 +378,5 @@ def scrape_github_data() -> List[Dict[str, str]]:
 if __name__ == "__main__":
     data = scrape_github_data()
     json.dump(data, open("data.json", "w"), indent=1)
+    
+#------------------------------------------------------------------------------------------------------------------------------------------------------
